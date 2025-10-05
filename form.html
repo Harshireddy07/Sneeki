@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AuraShoes — Checkout</title>
+<style>
+  :root{--bg:#F8F8FA;--card:#fff;--muted:#666;--accent:linear-gradient(90deg,#4A00E0,#8E2DE2)}
+  body{margin:0;font-family:Inter,system-ui;background:var(--bg);color:var(--muted);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:980px;margin:30px auto;padding:20px}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+  .stepper{display:flex;gap:6px}
+  .step{padding:8px 12px;border-radius:10px;background:rgba(0,0,0,0.04)}
+  .panel{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,0.06)}
+  form .row{display:flex;gap:8px;margin-bottom:10px}
+  input,select{padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);flex:1}
+  .summary{width:320px}
+  .grid{display:grid;grid-template-columns:1fr 320px;gap:18px}
+  .order-item{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px dashed rgba(0,0,0,0.06)}
+  .btn{padding:10px 14px;border-radius:12px;border:none;cursor:pointer}
+  .cta{background:linear-gradient(90deg,#4A00E0,#8E2DE2);color:#fff;font-weight:700}
+  @media (max-width:860px){ .grid{grid-template-columns:1fr} .summary{width:100%} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div style="font-weight:800;font-size:18px">Checkout</div>
+    <div class="spacer" style="flex:1"></div>
+    <div class="stepper"><div class="step">1 Shipping</div><div class="step">2 Payment</div></div>
+  </header>
+
+  <div class="grid">
+    <div>
+      <div id="stepShipping" class="panel">
+        <h3>Shipping Information</h3>
+        <form id="shippingForm">
+          <div class="row"><input required name="fullname" placeholder="Full name"></div>
+          <div class="row"><input required name="address1" placeholder="Address line 1"></div>
+          <div class="row"><input name="address2" placeholder="Address line 2 (optional)"></div>
+          <div class="row"><input required name="city" placeholder="City"><input required name="state" placeholder="State/Province"></div>
+          <div class="row"><input required name="postal" placeholder="Postal code"><select name="country"><option>India</option><option>United States</option></select></div>
+          <div class="row"><input required name="phone" placeholder="Phone number"><input required type="email" name="email" placeholder="Email"></div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn cta" id="toPayment" type="button">Continue to Payment</button>
+            <button class="btn" type="button" onclick="history.back()">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="stepPayment" class="panel" style="margin-top:12px;display:none">
+        <h3>Payment</h3>
+        <form id="paymentForm">
+          <div style="margin-bottom:8px">We accept major cards.</div>
+          <div class="row"><input name="card" placeholder="Card number (4242 4242 4242 4242)"></div>
+          <div class="row"><input name="exp" placeholder="MM/YY"><input name="cvv" placeholder="CVV"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+            <button class="btn cta" id="placeOrder" type="button">Place Order</button>
+            <div style="font-size:13px;color:var(--muted)">Secure payment • SSL encrypted</div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <aside class="summary panel">
+      <h3>Order Summary</h3>
+      <div id="orderList" style="max-height:360px;overflow:auto"></div>
+      <div style="display:flex;justify-content:space-between;margin-top:10px"><div>Subtotal</div><div id="sub">₹0</div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px"><div>Shipping</div><div id="ship">Free</div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:12px;font-weight:800"><div>Total</div><div id="totalVal">₹0</div></div>
+    </aside>
+  </div>
+</div>
+
+<script>
+/* Load cart from localStorage (set by index.html) */
+const cart = JSON.parse(localStorage.getItem('last_order_cart') || '[]');
+if(!cart.length){
+  alert('No items in cart. Redirecting to shop.');
+  location = 'index.html';
+}
+
+function renderOrder(){
+  const node = document.getElementById('orderList');
+  node.innerHTML = cart.map(it=>`
+    <div class="order-item">
+      <img src="${it.img}" style="width:64px;height:56px;object-fit:cover;border-radius:8px">
+      <div style="flex:1">
+        <div style="font-weight:700;color:#222">${it.name}</div>
+        <div class="small">Size ${it.size} • ${it.color}</div>
+      </div>
+      <div style="font-weight:800">₹${(it.price*it.qty).toLocaleString()}</div>
+    </div>
+  `).join('');
+  const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  document.getElementById('sub').textContent = `₹${subtotal.toLocaleString()}`;
+  document.getElementById('totalVal').textContent = `₹${subtotal.toLocaleString()}`;
+}
+
+/* Multi-step navigation */
+const stepShipping = document.getElementById('stepShipping');
+const stepPayment = document.getElementById('stepPayment');
+document.getElementById('toPayment').addEventListener('click', ()=>{
+  const form = document.getElementById('shippingForm');
+  if(!form.checkValidity()){ form.reportValidity(); return; }
+  // collect shipping data
+  const fd = new FormData(form);
+  const ship = Object.fromEntries(fd.entries());
+  localStorage.setItem('shipping_info', JSON.stringify(ship));
+  stepShipping.style.display='none';
+  stepPayment.style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+/* Place order (simulated) */
+document.getElementById('placeOrder').addEventListener('click', ()=>{
+  const payForm = document.getElementById('paymentForm');
+  // basic validation
+  if(!payForm.card.value || !payForm.exp.value || !payForm.cvv.value){ payForm.reportValidity(); alert('Enter payment details (use 4242 4242 ...)'); return; }
+  const shipping = JSON.parse(localStorage.getItem('shipping_info')||'{}');
+  const orderNumber = 'AS' + Date.now().toString().slice(-8);
+  const order = {orderNumber, cart, shipping, total: document.getElementById('totalVal').textContent, created: new Date().toISOString()};
+  // persist order for thank-you page
+  localStorage.setItem('last_placed_order', JSON.stringify(order));
+  // clear cart keys
+  localStorage.removeItem('shoe_cart');
+  localStorage.removeItem('last_order_cart');
+  // simulate success and redirect
+  location = 'thankyou.html';
+});
+
+/* init */
+renderOrder();
+</script>
+</body>
+</html>
