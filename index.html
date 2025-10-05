@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AuraShoes — Home</title>
+<link rel="icon" href="data:;base64,iVBORw0KGgo=" />
+<style>
+  :root{
+    --bg:#F8F8FA; --card:#fff; --muted:#666; --accent1:linear-gradient(90deg,#4A00E0,#8E2DE2);
+    --glass: rgba(255,255,255,0.6);
+  }
+  [data-theme="dark"]{
+    --bg:#0f1112; --card:#0d0f11; --muted:#bfbfbf; --glass: rgba(255,255,255,0.04);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto; background:var(--bg); color:var(--muted); -webkit-font-smoothing:antialiased}
+  header{position:sticky;top:0;backdrop-filter: blur(6px); display:flex;align-items:center;gap:18px;padding:14px 20px;background:linear-gradient(180deg,rgba(255,255,255,0.4),transparent);z-index:60}
+  [data-theme="dark"] header{background:linear-gradient(180deg,rgba(10,10,10,0.7),transparent)}
+  .logo{font-weight:700;color:var(--muted);letter-spacing:0.4px}
+  nav{margin-left:10px;display:flex;gap:14px;align-items:center}
+  a.navlink{color:var(--muted);text-decoration:none;font-weight:600}
+  .spacer{flex:1}
+  .btn{padding:8px 14px;border-radius:12px;border:none;cursor:pointer;font-weight:700}
+  .cta{background:var(--accent1); color:white; box-shadow:0 6px 20px rgba(78,30,201,0.12)}
+  .icon-btn{background:transparent;padding:8px;border-radius:10px}
+  .container{max-width:1200px;margin:28px auto;padding:0 20px}
+  .hero{display:grid;grid-template-columns:1fr 420px;gap:28px;align-items:center;margin-bottom:28px}
+  .hero .headline{font-size:34px;color:var(--muted);line-height:1.05}
+  .sub{color:var(--muted);opacity:.85;margin-top:10px}
+  .carousel{border-radius:18px;overflow:hidden;box-shadow:0 12px 40px rgba(18,18,18,0.08);background:var(--card);padding:18px}
+  .featured-grid{display:flex;gap:18px;margin-top:18px}
+  .card{background:var(--card);border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:0 8px 30px rgba(10,10,10,0.04)}
+  img.product{width:180px;height:140px;object-fit:cover;border-radius:10px}
+  .pname{font-weight:700;color:var(--muted)}
+  .price{font-weight:800;color:#222}
+  /* catalog */
+  .controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:18px 0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+  .product-tile{background:var(--card);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;transition:transform .18s ease,box-shadow .18s ease}
+  .product-tile:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(0,0,0,0.08)}
+  .tile-top{display:flex;align-items:center;justify-content:space-between}
+  .swatches{display:flex;gap:6px}
+  .sw{width:18px;height:18px;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.08);border:2px solid rgba(255,255,255,0.6)}
+  .add{margin-top:auto;width:100%;display:flex;gap:8px}
+  .small{font-size:13px;color:var(--muted)}
+  .cart-floating{position:fixed;right:18px;bottom:18px;background:var(--accent1);color:#fff;padding:12px 16px;border-radius:14px;box-shadow:0 18px 40px rgba(78,30,201,0.15);cursor:pointer;z-index:120}
+  /* cart drawer */
+  .drawer{position:fixed;right:0;top:0;height:100%;width:360px;background:var(--card);box-shadow:-20px 0 60px rgba(2,2,2,0.18);transform:translateX(120%);transition:transform .28s ease;padding:18px;z-index:200}
+  .drawer.open{transform:translateX(0)}
+  .cart-item{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px dashed rgba(0,0,0,0.06)}
+  .qty{display:flex;gap:8px;align-items:center}
+  /* footer */
+  footer{margin-top:28px;padding:28px 20px;text-align:center;color:var(--muted)}
+  /* responsive */
+  @media (max-width:900px){ .hero{grid-template-columns:1fr; } .carousel{order:-1} header{padding:12px} .drawer{width:100%} }
+</style>
+</head>
+<body data-theme="light">
+<header>
+  <div class="logo">AuraShoes</div>
+  <nav>
+    <a class="navlink" href="#features">Features</a>
+    <a class="navlink" href="#collection">Collection</a>
+    <a class="navlink" href="#about">About</a>
+  </nav>
+  <div class="spacer"></div>
+  <button id="themeToggle" class="icon-btn" title="Toggle theme">🌙</button>
+  <button id="openCart" class="btn">Cart (<span id="cartCount">0</span>)</button>
+</header>
+
+<main class="container">
+  <section class="hero">
+    <div>
+      <div class="headline">Step into comfort. Step into Aura.</div>
+      <p class="sub">Modern silhouettes, premium comfort — curated for daily life and weekend runs. Free shipping over ₹1999.</p>
+      <div style="margin-top:16px;display:flex;gap:12px">
+        <button class="btn cta" onclick="document.getElementById('catalog').scrollIntoView({behavior:'smooth'})">Shop Now</button>
+        <button class="btn" onclick="openNewsletter()">Subscribe</button>
+      </div>
+
+      <div class="featured-grid" aria-hidden="false">
+        <!-- featured products rendered by JS -->
+      </div>
+    </div>
+
+    <div class="carousel" aria-hidden="false">
+      <img src="https://via.placeholder.com/800x420?text=Hero+Collection" alt="Hero" style="width:100%;height:220px;object-fit:cover;border-radius:12px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:800;font-size:16px;color:var(--muted)">New Arrival</div>
+          <div style="font-size:13px;color:var(--muted)">AuraRun 3 — Lightweight running shoe</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-weight:800;color:#222">₹4,499</div>
+          <div style="font-size:12px;color:var(--muted)">Free returns • 2-year warranty</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="collection">
+    <div style="display:flex;justify-content:space-between;align-items:end">
+      <h2 style="margin:0;color:var(--muted)">Shop All</h2>
+      <div class="small">Showing <span id="showingCount">0</span> products</div>
+    </div>
+
+    <div class="controls">
+      <select id="filterCategory">
+        <option value="all">All Categories</option>
+      </select>
+      <select id="filterSize">
+        <option value="all">All Sizes</option>
+        <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+      </select>
+      <select id="sortBy">
+        <option value="new">Newest</option>
+        <option value="low">Price: Low → High</option>
+        <option value="high">Price: High → Low</option>
+      </select>
+      <input id="search" placeholder="Search shoes..." style="padding:8px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);flex:1" />
+    </div>
+
+    <div id="catalog" class="grid">
+      <!-- product tiles injected by JS -->
+    </div>
+  </section>
+
+</main>
+
+<button class="cart-floating" id="floatingCart">🛒 <span id="floatCount">0</span></button>
+
+<!-- Cart drawer -->
+<aside id="cartDrawer" class="drawer" aria-hidden="true">
+  <h3>Your Cart</h3>
+  <div id="cartItems" style="overflow:auto;max-height:60vh;margin-top:12px"></div>
+  <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center">
+    <div><strong>Subtotal</strong></div><div id="subtotal">₹0</div>
+  </div>
+  <div style="margin-top:12px;display:flex;gap:8px">
+    <button class="btn cta" onclick="goToCheckout()">Proceed to Checkout</button>
+    <button class="btn" onclick="toggleCart()">Continue Shopping</button>
+  </div>
+</aside>
+
+<footer>
+  <div>© <span id="year"></span> AuraShoes — Crafted with care.</div>
+</footer>
+
+<script>
+/* ---------------------------
+  Mock product data (would be a JSON from API)
+   fields: id, name, price, desc, images[], sizes[], colors[], category
+-----------------------------*/
+const PRODUCTS = [
+  {id:1,name:"AuraRun 3",price:4499,desc:"Lightweight running shoe with breathable mesh.","images":["https://via.placeholder.com/600x400?text=AuraRun+3","https://via.placeholder.com/600x400?text=AuraRun+3+side"],sizes:[6,7,8,9,10],colors:["#222","#f2c94c"],category:"Sneakers",popular:true},
+  {id:2,name:"CityWalker Lo",price:3499,desc:"Daily walking shoe with soft sole.","images":["https://via.placeholder.com/600x400?text=CityWalker+Lo"],sizes:[6,7,8,9,10],colors:["#8E2DE2","#4A00E0"],category:"Casual",popular:true},
+  {id:3,name:"TrailMaster",price:5299,desc:"Durable trail boot for rough terrain.","images":["https://via.placeholder.com/600x400?text=TrailMaster"],sizes:[7,8,9,10],colors:["#6b5b3a","#2b8a3e"],category:"Boots"},
+  {id:4,name:"SummerBreeze Sandal",price:1999,desc:"Comfort sandals for warm days.","images":["https://via.placeholder.com/600x400?text=SummerBreeze"],sizes:[6,7,8,9,10],colors:["#ff7f50","#ffd54f"],category:"Sandals"},
+  {id:5,name:"RetroCourt",price:3999,desc:"Retro-styled court sneaker.","images":["https://via.placeholder.com/600x400?text=RetroCourt"],sizes:[6,7,8,9,10],colors:["#ffffff","#000000"],category:"Sneakers",popular:true},
+  {id:6,name:"SlipStream",price:2599,desc:"Slip-on shoe for quick trips.","images":["https://via.placeholder.com/600x400?text=SlipStream"],sizes:[6,7,8,9,10],colors:["#555","#f48fb1"],category:"Casual"}
+];
+
+/* --- Utilities --- */
+const qs = s => document.querySelector(s);
+const qsa = s => Array.from(document.querySelectorAll(s));
+
+/* --- Theme toggle --- */
+const themeToggle = qs('#themeToggle');
+themeToggle.addEventListener('click', () => {
+  const el = document.documentElement;
+  const next = el.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  el.setAttribute('data-theme', next);
+  themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
+});
+
+/* --- Render featured --- */
+function renderFeatured(){
+  const el = document.querySelector('.featured-grid');
+  el.innerHTML = '';
+  PRODUCTS.filter(p => p.popular).slice(0,5).forEach(p=>{
+    const div = document.createElement('div');
+    div.className='card';
+    div.innerHTML = `
+      <img class="product" src="${p.images[0]}" alt="${p.name}">
+      <div class="pname">${p.name}</div>
+      <div class="price">₹${p.price.toLocaleString()}</div>
+      <button class="btn" onclick="openProduct(${p.id})">View Product</button>
+    `;
+    el.appendChild(div);
+  });
+}
+
+/* --- Catalog rendering with filters --- */
+const catalog = qs('#catalog');
+const filterCategory = qs('#filterCategory');
+const filterSize = qs('#filterSize');
+const sortBy = qs('#sortBy');
+const search = qs('#search');
+const showingCount = qs('#showingCount');
+
+function populateCategories(){
+  const cats = Array.from(new Set(PRODUCTS.map(p=>p.category)));
+  cats.forEach(c=>{
+    const opt = document.createElement('option');
+    opt.value=c; opt.textContent=c; filterCategory.appendChild(opt);
+  });
+}
+
+function renderCatalog(){
+  const cat = filterCategory.value;
+  const size = filterSize.value;
+  const sort = sortBy.value;
+  const q = search.value.trim().toLowerCase();
+  let list = PRODUCTS.slice();
+  if(cat !== 'all') list = list.filter(p=>p.category===cat);
+  if(size !== 'all') list = list.filter(p=>p.sizes.includes(Number(size)));
+  if(q) list = list.filter(p=>p.name.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q));
+  if(sort==='low') list.sort((a,b)=>a.price-b.price);
+  if(sort==='high') list.sort((a,b)=>b.price-a.price);
+  if(sort==='new') list.sort((a,b)=>b.id-a.id);
+
+  catalog.innerHTML = '';
+  list.forEach(p=>{
+    const tile = document.createElement('div');
+    tile.className='product-tile';
+    tile.innerHTML = `
+      <div class="tile-top">
+        <div style="font-weight:700;color:var(--muted)">${p.name}</div>
+        <div style="font-weight:800">₹${p.price.toLocaleString()}</div>
+      </div>
+      <img src="${p.images[0]}" alt="${p.name}" style="height:160px;width:100%;object-fit:cover;border-radius:10px;">
+      <div class="small">${p.desc}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="swatches">${p.colors.map(c=>`<span class="sw" style="background:${c}"></span>`).join('')}</div>
+        <div style="font-size:13px;color:var(--muted)">${p.sizes.join(' / ')}</div>
+      </div>
+      <div class="add">
+        <button class="btn" onclick="openProduct(${p.id})">View</button>
+        <button class="btn" onclick="quickAdd(${p.id})">Add</button>
+      </div>
+    `;
+    catalog.appendChild(tile);
+  });
+  showingCount.textContent = list.length;
+}
+
+/* --- Product modal (lightweight) --- */
+function openProduct(id){
+  const p = PRODUCTS.find(x=>x.id===id);
+  const modal = document.createElement('div');
+  modal.style=`
+    position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:999
+  `;
+  modal.innerHTML = `
+    <div style="width:min(900px,95%);background:var(--card);border-radius:12px;padding:18px;display:grid;grid-template-columns:1fr 320px;gap:12px">
+      <div>
+        <div style="border-radius:8px;overflow:hidden"><img src="${p.images[0]}" style="width:100%;height:360px;object-fit:cover"></div>
+        <div style="display:flex;gap:8px;margin-top:8px">${p.images.map(im=>`<img src="${im}" style="width:80px;height:60px;object-fit:cover;border-radius:8px;cursor:pointer" onclick="this.closest('div').parentElement.querySelector('img').src='${im}'">`).join('')}</div>
+      </div>
+      <div>
+        <div style="font-weight:900;font-size:20px;color:var(--muted)">${p.name}</div>
+        <div style="font-weight:800;font-size:18px;color:#222;margin-top:6px">₹${p.price.toLocaleString()}</div>
+        <p style="margin-top:8px;color:var(--muted)">${p.desc}</p>
+        <div style="margin-top:10px"><strong>Sizes</strong>
+          <div style="display:flex;gap:8px;margin-top:8px">${p.sizes.map(s=>`<button class="btn" style="padding:6px 8px;border-radius:8px" onclick="this.parentElement.querySelectorAll('button').forEach(b=>b.style.opacity=0.6);this.style.opacity=1;this.dataset.size='${s}'">${s}</button>`).join('')}</div>
+        </div>
+        <div style="margin-top:10px"><strong>Colors</strong>
+          <div style="display:flex;gap:8px;margin-top:8px">${p.colors.map((c,idx)=>`<div class="sw" style="background:${c};cursor:pointer" onclick="this.parentElement.querySelectorAll('.sw').forEach(s=>s.style.transform='scale(1)');this.style.transform='scale(1.12)';this.dataset.color='${c}'"></div>`).join('')}</div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:8px">
+          <button class="btn cta" onclick="addToCart(${p.id})">Add to Cart</button>
+          <button class="btn" onclick="addToCart(${p.id},true)">Buy Now</button>
+        </div>
+      </div>
+      <button style="position:absolute;right:18px;top:18px;background:none;border:none;color:white;font-size:22px" onclick="document.body.removeChild(document.currentScript?.parentElement || this.closest('div').parentElement)">✕</button>
+    </div>
+  `;
+  // close by clicking outside
+  modal.addEventListener('click', e=>{
+    if(e.target===modal) document.body.removeChild(modal);
+  });
+  document.body.appendChild(modal);
+}
+
+/* --- Cart logic (localStorage) --- */
+const CART_KEY = 'shoe_cart';
+function loadCart(){ try{ return JSON.parse(localStorage.getItem(CART_KEY))||[] }catch(e){return []} }
+function saveCart(cart){ localStorage.setItem(CART_KEY, JSON.stringify(cart)); updateCartUI(); }
+function addToCart(id,buyNow=false){
+  const p = PRODUCTS.find(x=>x.id===id);
+  // choose default size/color
+  const size = p.sizes[0], color = p.colors[0];
+  const cart = loadCart();
+  const existing = cart.find(i=>i.id===id && i.size===size && i.color===color);
+  if(existing) existing.qty++;
+  else cart.push({id, name:p.name, price:p.price, img:p.images[0], size, color, qty:1});
+  saveCart(cart);
+  if(buyNow) goToCheckout();
+  showToast('Added to cart');
+}
+function quickAdd(id){
+  addToCart(id,false);
+}
+
+/* render cart drawer */
+function updateCartUI(){
+  const cart = loadCart();
+  qs('#cartCount').textContent = cart.reduce((s,i)=>s+i.qty,0);
+  qs('#floatCount').textContent = cart.reduce((s,i)=>s+i.qty,0);
+  qs('#cartItems').innerHTML = cart.map((it,idx)=>`
+    <div class="cart-item">
+      <img src="${it.img}" style="width:64px;height:56px;object-fit:cover;border-radius:8px">
+      <div style="flex:1">
+        <div style="font-weight:700;color:var(--muted)">${it.name}</div>
+        <div class="small">Size ${it.size} • ${it.color}</div>
+        <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
+          <div class="qty">
+            <button onclick="changeQty(${idx}, -1)">−</button>
+            <div style="padding:6px 8px;border-radius:8px;background:var(--glass)">${it.qty}</div>
+            <button onclick="changeQty(${idx}, 1)">+</button>
+          </div>
+          <div style="margin-left:auto;font-weight:800">₹${(it.price*it.qty).toLocaleString()}</div>
+        </div>
+      </div>
+    </div>
+  `).join('') || '<div style="padding:18px;color:var(--muted)">Your cart is empty</div>';
+  const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  qs('#subtotal').textContent = `₹${subtotal.toLocaleString()}`;
+  qs('#cartCount').textContent = cart.reduce((s,i)=>s+i.qty,0);
+}
+function changeQty(index, delta){
+  const cart = loadCart();
+  if(!cart[index]) return;
+  cart[index].qty += delta;
+  if(cart[index].qty < 1) cart.splice(index,1);
+  saveCart(cart);
+}
+function toggleCart(){ qs('#cartDrawer').classList.toggle('open'); }
+qs('#openCart').addEventListener('click', toggleCart);
+qs('#floatingCart').addEventListener('click', toggleCart);
+
+/* Proceed to checkout */
+function goToCheckout(){
+  const cart = loadCart();
+  if(!cart.length){ showToast('Add items before checkout'); return; }
+  // save lastCart for checkout
+  localStorage.setItem('last_order_cart', JSON.stringify(cart));
+  window.location = 'form.html';
+}
+
+/* small toast */
+function showToast(msg){
+  const t = document.createElement('div');
+  t.textContent = msg; t.style = 'position:fixed;left:50%;transform:translateX(-50%);bottom:90px;background:#222;color:#fff;padding:10px 14px;border-radius:10px;z-index:9999;opacity:0;transition:opacity .18s';
+  document.body.appendChild(t);
+  requestAnimationFrame(()=>t.style.opacity=1);
+  setTimeout(()=>{ t.style.opacity=0; setTimeout(()=>document.body.removeChild(t),220); },1400);
+}
+
+/* quick newsletter handler */
+function openNewsletter(){ prompt('Enter email to subscribe'); showToast('Thanks — subscribed!'); }
+
+/* init */
+document.getElementById('year').textContent = new Date().getFullYear();
+populateCategories();
+renderFeatured();
+renderCatalog();
+updateCartUI();
+
+/* event listeners */
+[filterCategory,filterSize,sortBy,search].forEach(el=>el.addEventListener('input', renderCatalog));
+
+</script>
+</body>
+</html>
