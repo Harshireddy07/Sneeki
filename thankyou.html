@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Thank you — AuraShoes</title>
+<style>
+  body{font-family:Inter,system-ui;background:#F8F8FA;color:#333;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}
+  .card{background:white;padding:28px;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.08);max-width:760px;width:90%}
+  h1{margin:0;font-size:28px}
+  .muted{color:#666;margin-top:6px}
+  .order{margin-top:18px;display:flex;gap:12px;align-items:center}
+  .items{margin-top:12px}
+  .btn{padding:10px 14px;border-radius:12px;border:none;cursor:pointer}
+  .cta{background:linear-gradient(90deg,#4A00E0,#8E2DE2);color:#fff}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Thank you for your order!</h1>
+    <div class="muted" id="summaryText">We're preparing your items — a confirmation has been sent to your email.</div>
+
+    <div id="orderBox" style="margin-top:14px"></div>
+
+    <div style="margin-top:18px;display:flex;gap:8px">
+      <button class="btn cta" onclick="location='index.html'">Continue Shopping</button>
+      <button class="btn" onclick="downloadReceipt()">Download Receipt (JSON)</button>
+    </div>
+  </div>
+
+<script>
+const order = JSON.parse(localStorage.getItem('last_placed_order') || 'null');
+if(!order){
+  document.getElementById('summaryText').textContent = 'No recent order found. Redirecting to shop...';
+  setTimeout(()=>location='index.html',1400);
+} else {
+  document.getElementById('summaryText').textContent = `Order #${order.orderNumber} • ${new Date(order.created).toLocaleString()}`;
+  const box = document.getElementById('orderBox');
+  box.innerHTML = `
+    <div style="font-weight:800;margin-top:8px">Items (${order.cart.length})</div>
+    <div class="items">
+      ${order.cart.map(it=>`<div style="display:flex;gap:12px;align-items:center;padding:8px 0;border-bottom:1px dashed #eee">
+        <img src="${it.img}" style="width:64px;height:56px;object-fit:cover;border-radius:8px">
+        <div style="flex:1"><div style="font-weight:700">${it.name}</div><div style="color:#666">Size ${it.size} • Qty ${it.qty}</div></div>
+        <div style="font-weight:800">${(it.price*it.qty).toLocaleString()}</div>
+      </div>`).join('')}
+    </div>
+    <div style="margin-top:10px;display:flex;justify-content:space-between"><div style="color:#666">Shipping to</div><div style="font-weight:700">${order.shipping.fullname}</div></div>
+    <div style="color:#666;margin-top:6px">${order.shipping.address1} ${order.shipping.address2 || ''}, ${order.shipping.city} • ${order.shipping.postal}</div>
+    <div style="margin-top:10px;font-weight:800">Total ${order.total}</div>
+  `;
+}
+
+// download JSON
+function downloadReceipt(){
+  if(!order) return;
+  const blob = new Blob([JSON.stringify(order,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `AuraShoes_Order_${order.orderNumber}.json`; a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
